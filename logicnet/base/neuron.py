@@ -156,3 +156,12 @@ class BaseNeuron(ABC):
         bt.logging.warning(
             "load_state() not implemented for this neuron. You can implement this function to load model checkpoints or other useful data."
         )
+    def forward_pass(self, input_data):
+        # Pin memory to improve data transfer efficiency from CPU to GPU
+        input_data = torch.tensor(input_data, pin_memory=True).to(device, non_blocking=True)
+        
+        # Perform operations asynchronously to prevent GPU from being blocked
+        result = self.model(input_data)  # Assuming the model is already set up for inference
+        result = result.cpu().numpy()  # Move result back to CPU asynchronously if necessary
+        
+        return result
